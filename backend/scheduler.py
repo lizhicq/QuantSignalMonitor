@@ -1,9 +1,10 @@
 from threading import Timer
 from data_processor import process_stock_data
+from data_fetcher import get_update_stock_ids
 
 class Scheduler:
-    def __init__(self, stock_data_fetcher, intervals):
-        self.stock_data_fetcher = stock_data_fetcher
+    def __init__(self, intervals):
+        self.stock_info_df = get_update_stock_ids()
         self.intervals = intervals
         self.timer = None
 

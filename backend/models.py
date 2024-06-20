@@ -1,19 +1,29 @@
+import pandas as pd
+from data_fetcher import *
+import concurrent.futures
+import multiprocessing
+import time as time_module
 class Stock:
     def __init__(self, stock_id, name):
         self.stock_id = stock_id
-        self.name = name
-        self.transactions = []  # List of transactions to compute various intervals
+        raw_data = fetch_stock_data(self.stock_id)
+        self.stock_info_df = pd.DataFrame(raw_data)
 
-    def add_transaction(self, transaction):
-        self.transactions.append(transaction)
 
-    def calculate_amounts(self, intervals):
-        """
-        Calculate the total transaction amounts for the specified intervals.
-        """
-        amounts = {}
-        current_time = max(transaction['time'] for transaction in self.transactions)
-        for interval in intervals:
-            start_time = current_time - interval
-            amounts[interval] = sum(transaction['amount'] for transaction in self.transactions if transaction['time'] >= start_time)
-        return amounts
+if __name__ == "__main__":
+    stock_id_df = fetch_stock_ids()
+    x_set = set(stock_id_df['StockId'])
+    x_list = list(x_set)
+    # 使用 ThreadPoolExecutor 来创建线程池
+    start = time_module.time()
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        # 提交所有任务并获取 future 对象
+        futures = [executor.submit(fetch_stock_data, x) for x in x_list]
+        # as_completed 生成器在每个 future 完成时产生 future
+        for i, future in enumerate(concurrent.futures.as_completed(futures), 1):
+            result = future.result()  # 获取任务结果
+            print(f'任务 {i}/{len(x_list)} 完成')
+    end = time_module.time()
+    print('time comsuption:')
+    print(end - start)
+        

@@ -1,0 +1,26 @@
+<!doctype html>
+<html>
+<head>
+    <title>Transaction Amount Rankings</title>
+</head>
+<body>
+    <h1>Transaction Amount Rankings</h1>
+    {% for minutes, table_data in data.items() %}
+    <h2>{{ minutes }} Minute Rankings</h2>
+    <table border="1">
+        <tr>
+            <th>Rank</th>
+            <th>Stock id</th>
+            <th>Amount</th>
+        </tr>
+        {% for item in table_data %}
+        <tr>
+            <td>{{ loop.index }}</td>
+            <td>{{ item['name'] }}</td>
+            <td>{{ item['amount'] }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% endfor %}
+</body>
+</html>

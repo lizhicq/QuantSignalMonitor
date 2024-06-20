@@ -1,26 +1,38 @@
-from backend.models import Stock
-import unittest
+from data.stock_info_sample import sample
+import pandas as pd 
 
-class TestStock(unittest.TestCase):
-    def setUp(self):
-        self.stock = Stock(stock_id="12345", name="TestStock")
-        self.transactions = [
-            {'time': 1590, 'amount': 500, 'price': 10},
-            {'time': 1600, 'amount': 300, 'price': 15},
-            {'time': 1610, 'amount': 200, 'price': 20}
-        ]
-        for t in self.transactions:
-            self.stock.add_transaction(t)
 
-    def test_calculate_amounts(self):
-        intervals = [10, 20]
-        results = self.stock.calculate_amounts(intervals)
-        self.assertEqual(len(results), 2)
-        self.assertEqual(results[10]['amount'], 500 + 300)
-        self.assertAlmostEqual(results[10]['price_gain'], 50.0)  # from 10 to 15
+df = pd.DataFrame(sample['Klineresult'])
+windows = [1, 2, 3, 5, 10, 20]
 
-        self.assertEqual(results[20]['amount'], 500 + 300 + 200)
-        self.assertAlmostEqual(results[20]['price_gain'], 100.0)  # from 10 to 20
+results = {}
 
-if __name__ == '__main__':
-    unittest.main()
+for window in windows:
+    # 滚动窗口
+    df_roll = df.rolling(window=window, on='time')
+    
+    # 成交金额（Total Amount） - 10分钟内所有交易的成交金额总和。
+    # 涨幅（Price Increase） - 10分钟结束时的收盘价与开始时的开盘价之差。
+    # 区间涨幅（Interval Price Increase） - 10分钟内最高价与最低价之差。
+    # 统计区间（Statistical Interval） - 选择的10分钟内数据点的时间范围。
+    # 拉升幅度（Price Surge） - 最低价到最高价的涨幅比例。
+    # 计算各项指标
+    total_amount = df_roll['Amount'].sum()
+    price_increase = df_roll['Close'].apply(lambda x: x.iloc[-1]) - df_roll['Open'].apply(lambda x: x.iloc[0])
+    statistical_interval = df_roll['time'].apply(lambda x: x.max() - x.min())
+    
+    range_high, range_low = df_roll['High'].max(), df_roll['Low'].min()
+    interval_price_increase = range_high - range_low
+    price_surge = (range_high - range_low) /range_low
+
+    # 存储结果
+    results[window] = {
+        'Total Amount': total_amount,
+        'Price Increase': price_increase,
+        'Interval Price Increase': interval_price_increase,
+        'Statistical Interval': statistical_interval,
+        'Price Surge': price_surge
+    }
+
+# 展示结果，例如10分钟窗口
+print(results[10])
