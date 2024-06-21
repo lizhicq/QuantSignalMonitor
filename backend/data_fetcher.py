@@ -4,7 +4,7 @@ import pandas as pd
 from config.data_config import * # type: ignore
 
 def fetch_multi_stock_id(stock_ids):
-    stock_ids_str = ','.join(stock_ids)
+    stock_ids_str = ','.join(map(str,stock_ids))
     # 构建请求URL，直接包含所有参数
     # Bug fix, requests.get(API_CONFIG['base_url'], params=params) 会把‘,’转成 %2C
     request_url = (
@@ -50,14 +50,14 @@ def fetch_all_stock_info(lasttime=0):
     if stock_result and stock_result['state'] == 0:
         return pd.DataFrame(stock_result['StockInfo'])
     
-def fetch_single_stock_id(stock_ids:str, lasttime=0):
+def fetch_single_stock_id(stock_ids:int, lasttime=0):
     """
     Fetch time-series data for a specific stock.
     """
     params = {
         'sourceId': API_CONFIG['source_id'],
         'lasttime': lasttime,
-        'StockID': stock_ids,
+        'StockID': str(stock_ids),
         'appId': API_CONFIG['app_id'],
         'type': API_CONFIG['time_series_type']
     }
