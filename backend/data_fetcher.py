@@ -3,33 +3,37 @@ import requests
 import pandas as pd
 from config.data_config import * # type: ignore
 
-def fetch_stocks():
-    df = pd.read_csv("config/stock_mapping.csv")
-    for step in range(0, len(df), 1000):
-        ids_set = df.iloc[step:step+1000]['StockId'].apply(str)
-        ids_list = ','.join(ids_set)
-        res = fetch_stock_id_amt(ids_list)
-        print(res)
-    return
+def fetch_multi_stock_id(stock_ids):
+    stock_ids_str = ','.join(stock_ids)
+    # 构建请求URL，直接包含所有参数
+    # Bug fix, requests.get(API_CONFIG['base_url'], params=params) 会把‘,’转成 %2C
+    request_url = (
+        f"{MULTI_API_CONFIG['base_url']}?"
+        f"sourceId={MULTI_API_CONFIG['sourceId']}&"
+        f"refreshSource={MULTI_API_CONFIG['refreshSource']}&"
+        f"StockID={stock_ids_str}&"  # 直接在URL中构建，避免自动编码
+        f"clientType={MULTI_API_CONFIG['clientType']}&"
+        f"appId={MULTI_API_CONFIG['appId']}&"
+        f"imei={MULTI_API_CONFIG['imei']}&"
+        f"deviceNo={MULTI_API_CONFIG['deviceNo']}&"
+        f"packageName={MULTI_API_CONFIG['packageName']}&"
+        f"type={MULTI_API_CONFIG['type']}&"
+        f"version={MULTI_API_CONFIG['version']}"
+    )
 
-def fetch_stock_id_amt(stock_ids:list):
-    params = {
-        "sourceId": MULTI_API_CONFIG['sourceId'],
-        "refreshSource": MULTI_API_CONFIG['refreshSource'],
-        "StockID": ','.join(stock_ids),
-        "clientType": MULTI_API_CONFIG['clientType'],
-        "appId":MULTI_API_CONFIG['appId'],
-        "imei": MULTI_API_CONFIG['imei'],
-        "deviceNo": MULTI_API_CONFIG['deviceNo'],
-        "packageName": MULTI_API_CONFIG['packageName'],
-        "type": MULTI_API_CONFIG['type'],
-        "version": MULTI_API_CONFIG['version']
-    }
-    ç = requests.get(MULTI_API_CONFIG['base_url'], params=params)
-    result = response.json()
-    return result
+    # 发送GET请求
+    retry = 0
+    while retry < 5:
+        try:
+            response = requests.get(request_url)
+            result = response.json()
+            return result
+        except Exception as e:  # 包括处理JSON解码失败的情况
+            print(e)
+            retry += 1
+    return None
 
-def fetch_stock_ids(lasttime=0):
+def fetch_all_stock_info(lasttime=0):
     """
     Fetch stock ID definitions from the API.
     """
@@ -46,7 +50,7 @@ def fetch_stock_ids(lasttime=0):
     if stock_result and stock_result['state'] == 0:
         return pd.DataFrame(stock_result['StockInfo'])
     
-def fetch_stock_data(stock_ids:str, lasttime=0):
+def fetch_single_stock_id(stock_ids:str, lasttime=0):
     """
     Fetch time-series data for a specific stock.
     """
@@ -65,4 +69,4 @@ def fetch_stock_data(stock_ids:str, lasttime=0):
         return stock_info_res['Klineresult']
 
 if __name__ == "__main__":
-    fetch_stocks()
+    pass
