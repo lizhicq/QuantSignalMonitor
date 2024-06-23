@@ -27,6 +27,7 @@ def fetch_multi_stock_id(stock_ids):
         try:
             response = requests.get(request_url)
             result = response.json()
+            print(f"Debug Info: query multi stock ids URI {response.url},retry={retry}")
             return result
         except Exception as e:  # 包括处理JSON解码失败的情况
             print(e)
@@ -47,26 +48,25 @@ def fetch_all_stock_info(lasttime=0):
     }
     response = requests.get(API_CONFIG['base_url'], params=params)
     stock_result = response.json()
+    print(f"Debug Info: all stock info URI{response.url}")
     if stock_result and stock_result['state'] == 0:
         return pd.DataFrame(stock_result['StockInfo'])
     
-def fetch_single_stock_id(stock_ids:int, lasttime=0):
+def fetch_single_stock_id(stock_id:int, lasttime=0):
     """
     Fetch time-series data for a specific stock.
     """
     params = {
         'sourceId': API_CONFIG['source_id'],
         'lasttime': lasttime,
-        'StockID': str(stock_ids),
+        'StockID': str(stock_id),
         'appId': API_CONFIG['app_id'],
         'type': API_CONFIG['time_series_type']
     }
     response = requests.get(API_CONFIG['base_url'], params=params)
-    stock_info_res = response.json()
-    
-   # print(stock_id, stock_info_res)
-    if stock_info_res and stock_info_res['state'] == 0 and len(stock_info_res['Klineresult']) > 1:
-        return stock_info_res['Klineresult']
+    single_stock_res = response.json()
+    if single_stock_res and single_stock_res['state'] == 0 and len(single_stock_res['Klineresult']) > 1:
+        return single_stock_res
 
 if __name__ == "__main__":
     pass

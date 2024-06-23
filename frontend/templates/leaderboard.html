@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Leaderboard</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.2/css/bootstrap.min.css"
+    />
+    <style>
+      #clock,
+      #lastUpdate {
+        background-color: #fff;
+        padding: 10px;
+        border-radius: 5px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        position: fixed;
+        font-size: 18px;
+      }
+      #clock {
+        right: 20px;
+        top: 20px;
+        font-size: 24px;
+      }
+      #lastUpdate {
+        right: 20px;
+        top: 80px;
+        font-size: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Stock Leaderboard</h1>
+      <div id="data-tables"></div>
+    </div>
+    <div id="clock"></div>
+    <div id="lastUpdate">Last update: Loading...</div>
+    <script>
+      function updateClock() {
+        const now = new Date();
+        const timeString = now.toTimeString().split(" ")[0];
+        document.getElementById("clock").textContent = timeString;
+      }
+
+      function fetchData() {
+        fetch("/api/leaderboard")
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json(); // Directly parse JSON
+          })
+          .then((data) => {
+            console.log("Data received:", data);
+            updateLeaderboard(data);
+            document.getElementById("lastUpdate").textContent =
+              "Last updated at " + new Date().toTimeString().split(" ")[0];
+          })
+          .catch((error) => {
+            console.error("Error fetching data:", error);
+            document.getElementById(
+              "data-tables"
+            ).innerHTML = `<p class="text-danger">Failed to load data: ${error.message}</p>`;
+          });
+      }
+
+      function updateLeaderboard(data) {
+        let html = "";
+        Object.entries(data).forEach(([window, stocks]) => {
+          html += `<h2>Top 10 for ${window} Minutes</h2>
+                    <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Stock ID</th>
+                            <th>Stock Name</th>
+                            <th>Total Amount</th>
+                            <th>Price Increase</th>
+                            <th>Interval Price Increase</th>
+                            <th>Statistical Interval</th>
+                            <th>Price Surge</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
+          stocks.forEach((stock) => {
+            html += `<tr>
+                        <td>${stock.StockId}</td>
+                        <td>${stock.StockName}</td>
+                        <td>${stock.TotalAmount}</td>
+                        <td>${stock.PriceIncrease}</td>
+                        <td>${stock.IntervalPriceIncrease}</td>
+                        <td>${stock.StatisticalInterval}</td>
+                        <td>${stock.PriceSurge}</td>
+                    </tr>`;
+          });
+          html += "</tbody></table>";
+        });
+        document.getElementById("data-tables").innerHTML = html;
+      }
+      updateClock();
+      setInterval(updateClock, 1000);
+      fetchData();
+      setInterval(fetchData, 60000); // Fetch data every minute
+    </script>
+  </body>
+</html>

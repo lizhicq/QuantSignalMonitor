@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaderboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        #clock {
+            position: fixed;
+            right: 20px;
+            top: 20px;
+            font-size: 24px;
+            background-color: #fff;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Stock Leaderboard</h1>
+        {% for window, stocks in leaderboard.items() %}
+        <h2>Top 10 for {{ window }} Minutes</h2>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Stock ID</th>
+                    <th>Stock Name</th>
+                    <th>Total Amount</th>
+                    <th>Price Increase</th>
+                    <th>Interval Price Increase</th>
+                    <th>Statistical Interval</th>
+                    <th>Price Surge</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for stock in stocks %}
+                <tr>
+                    <td>{{ stock.StockId }}</td>
+                    <td>{{ stock.StockName }}</td>
+                    <td>{{ stock.TotalAmount }}</td>
+                    <td>{{ stock.PriceIncrease }}</td>
+                    <td>{{ stock.IntervalPriceIncrease }}</td>
+                    <td>{{ stock.StatisticalInterval }}</td>
+                    <td>{{ stock.PriceSurge }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% endfor %}
+    </div>
+    <div id="clock"></div>
+    <script>
+    function updateClock() {
+        const now = new Date();
+        const hours = now.getHours().toString().padStart(2, '0');
+        const minutes = now.getMinutes().toString().padStart(2, '0');
+        const seconds = now.getSeconds().toString().padStart(2, '0');
+        document.getElementById('clock').textContent = `${hours}:${minutes}:${seconds}`;
+    }
+    updateClock();
+    setInterval(updateClock, 1000);
+    </script>
+</body>
+</html>
