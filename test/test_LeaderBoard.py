@@ -25,7 +25,8 @@ class TestStockPool(unittest.TestCase):
 
     @patch('backend.StockPool.fetch_single_stock_id')
     @patch('backend.StockPool.fetch_multi_stock_id')
-    def test_create_leaderboard(self, mock_fetch_multi, mock_fetch_single):
+    @patch('backend.StockPool.save_leaderboard')
+    def test_create_leaderboard(self, mock_fetch_multi, mock_fetch_single, mock_save):
         # Setup mock data for multi_stock_id and single_stock_id
         mock_fetch_multi.return_value = {'pk': [{'StockId': f'{i:03}', 'data': 'some_data'} for i in range(1, 51)]}
         mock_fetch_single.side_effect = lambda stock_id: {

@@ -33,7 +33,7 @@
   <body>
     <div class="container">
       <h1>Stock Leaderboard</h1>
-      <div id="data-tables"></div>
+      <div id="data-tables" class="row"></div>
     </div>
     <div id="clock"></div>
     <div id="lastUpdate">Last update: Loading...</div>
@@ -42,7 +42,8 @@
         const now = new Date();
         const timeString = now.toTimeString().split(" ")[0];
         document.getElementById("clock").textContent = timeString;
-      }      
+      }
+
       function fetchData() {
         fetch("/api/leaderboard")
           .then((response) => {
@@ -67,36 +68,43 @@
 
       function updateLeaderboard(data) {
         let html = "";
-        Object.entries(data).forEach(([window, stocks]) => {
-          html += `<h2>Top 10 for ${window} Minutes</h2>
-                    <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>Stock ID</th>
-                            <th>Stock Name</th>
-                            <th>Total Amount</th>
-                            <th>Price Increase</th>
-                            <th>Interval Price Increase</th>
-                            <th>Statistical Interval</th>
-                            <th>Price Surge</th>
-                        </tr>
-                    </thead>
-                    <tbody>`;
+        let rowOpen = false;
+        let count = 0;
+        Object.entries(data).forEach(([window, stocks], index) => {
+          if (count % 3 === 0) {
+            if (rowOpen) html += "</div>"; // Close previous row if open
+            html += '<div class="row">'; // Start a new row
+            rowOpen = true;
+          }
+          html +=
+            '<div class="col-md-4"><h2>Top 10 for ' + window + " Minutes</h2>";
+          html +=
+            '<table class="table table-striped"><thead><tr><th>Stock ID</th><th>Stock Name</th><th>Total Amount</th><th>Price Increase</th><th>Interval Price Increase</th><th>Statistical Interval</th><th>Price Surge</th></tr></thead><tbody>';
           stocks.forEach((stock) => {
-            html += `<tr>
-                        <td>${stock.StockId}</td>
-                        <td>${stock.StockName}</td>
-                        <td>${stock.TotalAmount}</td>
-                        <td>${stock.PriceIncrease}</td>
-                        <td>${stock.IntervalPriceIncrease}</td>
-                        <td>${stock.StatisticalInterval}</td>
-                        <td>${stock.PriceSurge}</td>
-                    </tr>`;
+            html +=
+              "<tr><td>" +
+              stock.StockId +
+              "</td><td>" +
+              stock.StockName +
+              "</td><td>" +
+              stock.TotalAmount +
+              "</td><td>" +
+              stock.PriceIncrease +
+              "</td><td>" +
+              stock.IntervalPriceIncrease +
+              "</td><td>" +
+              stock.StatisticalInterval +
+              "</td><td>" +
+              stock.PriceSurge +
+              "</td></tr>";
           });
-          html += "</tbody></table>";
+          html += "</tbody></table></div>";
+          count++;
         });
+        if (rowOpen) html += "</div>"; // Close the last row
         document.getElementById("data-tables").innerHTML = html;
       }
+
       updateClock();
       setInterval(updateClock, 1000);
       fetchData();

@@ -23,11 +23,11 @@ class StockPool:
             res = fetch_multi_stock_id(id_list[step:step+800])
             records.extend(res['pk'])
         for record in records:
-            self.total_pool[record['StockId']].add_minute_data(record)
+            self.total_pool[record['StokId']].add_minute_data(record)
             
     def get_top_amt_stocks(self, window, num):
         """
-        返回区间内前交易额前20的股票
+        返回区间内前交易额前num的股票
         """
         return heapq.nlargest(
             num,
@@ -44,7 +44,7 @@ class StockPool:
                 try:
                     res = fetch_single_stock_id(stock_id)
                     df = pd.DataFrame(res['Klineresult'])
-                    df_roll = df.iloc[-window:]
+                    df_roll = df.iloc[-window:].sort_values(by=['Amount'])
                 except Exception as e:
                     print(f"Got Exception on {stock_id}, Exception is {e}")
                     continue
@@ -64,18 +64,17 @@ class StockPool:
                     'StockId': stock_id,
                     'StockName': stock.name,
                     'TotalAmount': total_amount,# 成交金额（Total Amount） - 10分钟内所有交易的成交金额总和。
-                    'PriceIncrease': price_increase,# 涨幅（Price Increase） - 10分钟结束时的收盘价与开始时的开盘价之差。
-                    'IntervalPriceIncrease': interval_price_increase,# 区间涨幅（Interval Price Increase） - 10分钟内最高价与最低价之差。
+                    'PriceIncrease': price_increase,# 涨幅（Price Increase） - 当天开盘价
+                    'IntervalPriceIncrease': interval_price_increase,# 区间收盘到开盘
                     'StatisticalInterval': statistical_interval, # 统计区间（Statistical Interval） - 选择的10分钟内数据点的时间范围。
                     'PriceSurge': price_surge # 拉升幅度（Price Surge） - 最低价到最高价的涨幅比例。
                 })
             self.leaderboard[window] = results  # Correct key usage for different windows
-        self.save_leaderboard()
         return json.dumps(self.leaderboard, ensure_ascii=False)  # Convert dictionary to JSON string`
 
-    def save_leaderboard(self):
+    @staticmethod
+    def save_leaderboard(leaderboard, base_dir=DATA_PATH_CONFIG['leaderboard_saving_path']):
         """保存当前leaderboard到一个按时间命名的JSON文件中"""
-        base_dir = DATA_PATH_CONFIG['leaderboard_saving_path']
         current_time = datetime.now()
         date_path = current_time.strftime('%Y%m%d')
         time_path = current_time.strftime('%H:%M')
@@ -84,8 +83,8 @@ class StockPool:
         file_name = f"{time_path}.json"
         full_file_path = os.path.join(full_path, file_name)
 
-        # 假设 self.leaderborad 是已经生成的数据
+        # 假设 leaderborad 是已经生成的数据
         with open(full_file_path, 'w', encoding='utf-8') as f:
-            json.dump(self.leaderboard, f, ensure_ascii=False)
+            json.dump(leaderboard, f, ensure_ascii=False)
 
         return full_file_path

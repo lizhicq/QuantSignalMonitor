@@ -67,14 +67,14 @@ class TestStockPool(unittest.TestCase):
         }
 
         # Mock data returned from fetch_multi_stock_id
-        mock_fetch_multi_stock_id.return_value = {'pk': [{'StockId': 101, 'Amount': 300}, {'StockId': 102, 'Amount': 450}]}
+        mock_fetch_multi_stock_id.return_value = {'pk': [{'StokId': 101, 'Amount': 300}, {'StokId': 102, 'Amount': 450}]}
 
         # Run update_stock_pool
         stock_pool.update_stock_pool()
 
         # Assert add_minute_data was called with correct records
-        stock_pool.total_pool[101].add_minute_data.assert_called_once_with({'StockId': 101, 'Amount': 300})
-        stock_pool.total_pool[102].add_minute_data.assert_called_once_with({'StockId': 102, 'Amount': 450})
+        stock_pool.total_pool[101].add_minute_data.assert_called_once_with({'StokId': 101, 'Amount': 300})
+        stock_pool.total_pool[102].add_minute_data.assert_called_once_with({'StokId': 102, 'Amount': 450})
     
     
     @patch('backend.StockPool.Stock')
@@ -82,7 +82,7 @@ class TestStockPool(unittest.TestCase):
     def test_get_top_amt_stocks(self, mock_read_csv, mock_Stock):
         # Setup DataFrame for read_csv
         mock_read_csv.return_value = pd.DataFrame({
-            'StockId': range(1, 31),  # Create 30 stock items
+            'StokId': range(1, 31),  # Create 30 stock items
             'StockName': [f'Stock{i}' for i in range(1, 31)],
             'WindCode': [f'WND{i}' for i in range(1, 31)]
         })
