@@ -1,9 +1,8 @@
 import pandas as pd
 from backend.Stock import Stock
-from datetime import datetime
 from config.data_config import DATA_PATH_CONFIG
-from backend.data_fetcher import fetch_multi_stock_id, fetch_single_stock_id
-import heapq,json,os
+from backend.data_fetcher import *
+import heapq,json
 
 class StockPool:
     def __init__(self, stock_mapping_path=None):
@@ -11,19 +10,27 @@ class StockPool:
             stock_mapping_path = DATA_PATH_CONFIG['stock_mapping']
         self.mapping_df = pd.read_csv(stock_mapping_path,index_col='StockId')
         self.total_pool = {}
+        self.top_stocks = {}
+        self.leaderboard = {}
         for StockId, row in self.mapping_df.iterrows():
             self.total_pool[StockId] = Stock(
                 StockId, row['StockName'], row['WindCode'])
-
+        
     def update_stock_pool(self, id_list=None):
+        print('this method is called ')
         if id_list is None:
             id_list = list(self.total_pool) # get keys
         records = []
+        savd_data = {}
         for step in range(0, len(self.total_pool), 800):
             res = fetch_multi_stock_id(id_list[step:step+800])
+            savd_data.update(res)
             records.extend(res['pk'])
+        save_json_to_datetime_path(savd_data,DATA_PATH_CONFIG['stockpool_saving_path'])
+        print(f'stock pool is saved')
         for record in records:
             self.total_pool[record['StokId']].add_minute_data(record)
+    
             
     def get_top_amt_stocks(self, window, num):
         """
@@ -34,10 +41,14 @@ class StockPool:
             self.total_pool.items(),
             key=lambda item: item[1].get_amt_of_last_n_minutes(window)
         )
+    
+    def update_top_amt_stocks(self):
+        for window in [1,2,3,5,10,20,30]:
+            top_50 = self.get_top_amt_stocks(window, 50)
+            self.top_stocks[window] = top_50
         
-    def create_leaderboard(self, top_num=10):
+    def create_leaderboard(self, top_num=50):
         windows = [1, 2, 3, 5, 10, 20, 30]
-        self.leaderboard = {}
         for window in windows:
             results = []
             for stock_id, stock in self.get_top_amt_stocks(window, top_num):
@@ -46,7 +57,7 @@ class StockPool:
                     df = pd.DataFrame(res['Klineresult'])
                     df_roll = df.iloc[-window:].sort_values(by=['Amount'])
                 except Exception as e:
-                    print(f"Got Exception on {stock_id}, Exception is {e}")
+                    print(f"Got Exception during create leaderboard on {stock_id} and stock={stock.name}, Exception is {e}")
                     continue
                 # Calculate metrics
                 total_amount = int(df_roll['Amount'].sum())  # Convert to int
@@ -71,20 +82,9 @@ class StockPool:
                 })
             self.leaderboard[window] = results  # Correct key usage for different windows
         return json.dumps(self.leaderboard, ensure_ascii=False)  # Convert dictionary to JSON string`
-
-    @staticmethod
-    def save_leaderboard(leaderboard, base_dir=DATA_PATH_CONFIG['leaderboard_saving_path']):
-        """保存当前leaderboard到一个按时间命名的JSON文件中"""
-        current_time = datetime.now()
-        date_path = current_time.strftime('%Y%m%d')
-        time_path = current_time.strftime('%H:%M')
-        full_path = os.path.join(base_dir, date_path)
-        os.makedirs(full_path, exist_ok=True)
-        file_name = f"{time_path}.json"
-        full_file_path = os.path.join(full_path, file_name)
-
-        # 假设 leaderborad 是已经生成的数据
-        with open(full_file_path, 'w', encoding='utf-8') as f:
-            json.dump(leaderboard, f, ensure_ascii=False)
-
-        return full_file_path
+    
+    def save_leaderboard(self,base_dir=DATA_PATH_CONFIG['leaderboard_saving_path']):
+        return save_json_to_datetime_path(
+            self.leaderboard,
+            base_dir
+        )

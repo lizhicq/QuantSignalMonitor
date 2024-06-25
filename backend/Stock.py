@@ -24,7 +24,7 @@ class Stock:
         因为存储的是存量数据，需要做一次减法，需要n+1条数据
         """
         if len(self.minute_data) < n+1:
-            return 0 # 如果没有足够数据，就默认成交金额是0
+            return self.minute_amt[-1] # 如果没有足够数据，就默认成交金额是最后一项
         return self.minute_amt[-1] - self.minute_amt[-1-n]
     
     def calculate_details(self):

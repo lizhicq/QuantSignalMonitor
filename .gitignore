@@ -1,2 +1,4 @@
 config/
 data/
+.vscode/
+.DS_Store

@@ -14,7 +14,7 @@ class Scheduler:
         try:
             stock_pool.update_stock_pool()
             stock_pool.create_leaderboard()
-            StockPool.save_leaderboard(stock_pool.leaderboard)
+            stock_pool.save_leaderboard()
             print(f'Stock pool got updated at {datetime.now()}')
         except Exception as e:
             print(f'Error updating stock pool: {e}')

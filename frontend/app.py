@@ -13,7 +13,7 @@ def get_data():
     with open(latest_file, 'r') as file:
         data = json.load(file)
     data = dict(data)
-    for window, stocks in data.items():
+    for _window, stocks in data.items():
         for stock in stocks:
             stock['PriceIncrease'] = round(stock['PriceIncrease'], 2)
             stock['IntervalPriceIncrease'] = round(stock['IntervalPriceIncrease'], 2)

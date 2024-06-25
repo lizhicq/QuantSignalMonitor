@@ -1,5 +1,6 @@
 # 用于从外部API获取数据
-import requests
+import requests,json,os
+from datetime import datetime
 import pandas as pd
 from config.data_config import * # type: ignore
 
@@ -65,8 +66,27 @@ def fetch_single_stock_id(stock_id:int, lasttime=0):
     }
     response = requests.get(API_CONFIG['base_url'], params=params)
     single_stock_res = response.json()
+    print(f'Debug: single stock query is called url={response.url}')
     if single_stock_res and single_stock_res['state'] == 0 and len(single_stock_res['Klineresult']) > 1:
         return single_stock_res
+
+def save_json_to_datetime_path(json_data, base_dir):
+    """_summary_
+    保存json数据到base_dir下的按日期命名的文件夹,分钟命名的文件里面
+    """
+    current_time = datetime.now()
+    date_path = current_time.strftime('%Y%m%d')
+    time_path = current_time.strftime('%H:%M')
+    full_path = os.path.join(base_dir, date_path)
+    os.makedirs(full_path, exist_ok=True)
+    file_name = f"{time_path}.json"
+    full_file_path = os.path.join(full_path, file_name)
+
+    # 假设 json_data 是已经生成的数据
+    with open(full_file_path, 'w', encoding='utf-8') as f:
+        json.dump(json_data, f, ensure_ascii=False, indent=4)
+
+    return full_file_path
 
 if __name__ == "__main__":
     pass
