@@ -79,7 +79,7 @@ class TestStockPool(unittest.TestCase):
     
     @patch('backend.StockPool.Stock')
     @patch('pandas.read_csv')
-    def test_get_top_amt_stocks(self, mock_read_csv, mock_Stock):
+    def test_get_top_n_stocks_within_w_min(self, mock_read_csv, mock_Stock):
         # Setup DataFrame for read_csv
         mock_read_csv.return_value = pd.DataFrame({
             'StokId': range(1, 31),  # Create 30 stock items
@@ -102,7 +102,7 @@ class TestStockPool(unittest.TestCase):
         for i in range(1, 31):
             stock_pool.total_pool[i] = mock_stock_instance
 
-        # Test get_top_amt_stocks
+        # Test get_top_n_stocks_within_w_min
         top_stocks = stock_pool.get_top_amt_stocks(30, 20)
         self.assertEqual(len(top_stocks), 20)  # Check if exactly 20 items are returned
         self.assertTrue(all(top_stocks[i][1].get_amt_of_last_n_minutes(30) >= top_stocks[i + 1][1].get_amt_of_last_n_minutes(30) 
