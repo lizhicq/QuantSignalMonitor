@@ -76,7 +76,7 @@ def save_json_to_datetime_path(json_data, base_dir):
     """
     current_time = datetime.now()
     date_path = current_time.strftime('%Y%m%d')
-    time_path = current_time.strftime('%H:%M')
+    time_path = current_time.strftime('%H-%M')
     full_path = os.path.join(base_dir, date_path)
     os.makedirs(full_path, exist_ok=True)
     file_name = f"{time_path}.json"

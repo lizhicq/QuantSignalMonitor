@@ -1,5 +1,4 @@
 from flask import Flask, render_template, jsonify
-from backend.StockPool import StockPool
 from datetime import datetime
 import glob,json,os
 
@@ -13,11 +12,9 @@ def get_data():
     with open(latest_file, 'r') as file:
         data = json.load(file)
     data = dict(data)
-    for _window, stocks in data.items():
-        for stock in stocks:
-            stock['PriceIncrease'] = round(stock['PriceIncrease'], 2)
-            stock['IntervalPriceIncrease'] = round(stock['IntervalPriceIncrease'], 2)
-            stock['PriceSurge'] = round(stock['PriceSurge'], 2)
+    for window, stocks_str in data.items():
+        stocks = json.loads(stocks_str)
+        data[window] = stocks[:10]
     return data
 
 @app.route('/api/leaderboard')

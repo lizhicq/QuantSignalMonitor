@@ -38,18 +38,20 @@ class Stock:
     
     def last_n_min_price_change_since_open(self, n:int):
         open = self.klineres.iloc[0]['Open']
-        close = self.klineres.iloc[-1]['CLose']
-        return close - open
+        close = self.klineres.iloc[-1]['Close']
+        return (close - open)/open
     
     def last_n_min_price_change_interval(self, n:int):
         open = self.klineres.iloc[-n]['Open']
-        close = self.klineres.iloc[-1]['CLose']
-        return close - open
+        close = self.klineres.iloc[-1]['Close']
+        return (close - open)/open
     
     def last_n_min_interval(self, n:int):
         start = time.localtime(self.klineres.iloc[-n]['time'])
         end = time.localtime(self.klineres.iloc[-1]['time'])
-        return f"{start} - {end}"
+        fstart = time.strftime("%H:%M", start)
+        fend = time.strftime("%H:%M", end)
+        return f"{fstart} - {fend}"
         
     def last_n_min_price_surge(self, n:int):
         df = self.klineres.iloc[-n:]
@@ -57,7 +59,7 @@ class Stock:
         for _index, row in df.iterrows():
             running_low = min(running_low, row['Low'])
             price_surge = max((row['High']-running_low)/running_low, price_surge)
-        return running_low
+        return price_surge
 
 if __name__ == "__main__":
     pass

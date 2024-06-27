@@ -72,13 +72,13 @@
                     <table class="table table-striped">
                     <thead>
                         <tr>
-                            <th>Stock ID</th>
-                            <th>Stock Name</th>
-                            <th>Total Amount</th>
-                            <th>Price Increase</th>
-                            <th>Interval Price Increase</th>
-                            <th>Statistical Interval</th>
-                            <th>Price Surge</th>
+                            <th>万德代码</th>
+                            <th>股票名称</th>
+                            <th>交易量</th>
+                            <th>开盘以来涨幅</th>
+                            <th>区间涨幅</th>
+                            <th>统计区间</th>
+                            <th>拉升幅度</th>
                         </tr>
                     </thead>
                     <tbody>`;
@@ -87,10 +87,10 @@
                         <td>${stock.StockId}</td>
                         <td>${stock.StockName}</td>
                         <td>${stock.TotalAmount}</td>
-                        <td>${stock.PriceIncrease}</td>
-                        <td>${stock.IntervalPriceIncrease}</td>
+                        <td>${(stock.PriceIncrease * 100).toFixed(2)}%</td>
+                        <td>${(stock.IntervalPriceIncrease*100).toFixed(2)}%</td>
                         <td>${stock.StatisticalInterval}</td>
-                        <td>${stock.PriceSurge}</td>
+                        <td>${(stock.PriceSurge*100).toFixed(2)}%</td>
                     </tr>`;
           });
           html += "</tbody></table>";

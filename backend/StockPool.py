@@ -6,12 +6,10 @@ import heapq,json
 
 class StockPool:
     def __init__(self, stock_mapping_path=None):
+        self.total_pool = {}
         if stock_mapping_path is None:
             stock_mapping_path = DATA_PATH_CONFIG['stock_mapping']
         df_mapping = pd.read_csv(stock_mapping_path,index_col='StockId')
-        self.total_pool = {}
-        self.leaderboard = {}
-        self.windows = [1,2,3,5,10,20,30]
         for StockId, row in df_mapping.iterrows():
             self.total_pool[StockId] = Stock(
                 StockId, row['StockName'], row['WindCode'])
@@ -34,8 +32,9 @@ class StockPool:
         """
         返回过去n分钟交易量前m的股票id
         """
-        return heapq.nlargest(
+        top_stocks = heapq.nlargest(
             m,
             self.total_pool.items(),
             key=lambda item: item[1].get_amt_of_last_n_minutes(n)
         )
+        return [item[0] for item in top_stocks]
