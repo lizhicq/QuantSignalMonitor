@@ -28,6 +28,9 @@
         top: 80px;
         font-size: 20px;
       }
+      .highlight{
+        background-color:#ffdddd
+      }
     </style>
   </head>
   <body>
@@ -83,7 +86,8 @@
                     </thead>
                     <tbody>`;
           stocks.forEach((stock) => {
-            html += `<tr>
+            const highlightClass = stock.PriceSurge > 0.02 ? 'highlight' : '';
+            html += `<tr class="${highlightClass}">
                         <td>${stock.StockId}</td>
                         <td>${stock.StockName}</td>
                         <td>${stock.TotalAmount}</td>

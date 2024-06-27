@@ -27,11 +27,11 @@ class Scheduler:
         while self.running:
             now = datetime.now().time()
             # Check if current time is within 11:30 to 13:30
-            # if dtime(11, 30) <= now <= dtime(13, 30):
-            #     wait_time = (dtime(13, 30).hour * 3600 + dtime(13, 30).minute * 60) - (now.hour * 3600 + now.minute * 60 + now.second)
-            #     print(f'Waiting during lunch break for {wait_time} seconds')
-            #     time.sleep(wait_time)
-            #     continue
+            if dtime(11, 30) <= now <= dtime(13, 30):
+                wait_time = (dtime(13, 30).hour * 3600 + dtime(13, 30).minute * 60) - (now.hour * 3600 + now.minute * 60 + now.second)
+                print(f'Waiting during lunch break for {wait_time} seconds')
+                time.sleep(wait_time)
+                continue
             
             # Check if current time is outside trading hours (9:30 to 16:00)
             if now < dtime(9, 30) or now > dtime(16, 0):

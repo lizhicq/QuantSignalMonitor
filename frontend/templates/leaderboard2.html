@@ -28,6 +28,9 @@
         top: 80px;
         font-size: 20px;
       }
+      .highlight {
+        background-color: #ffdddd !important;
+      }
     </style>
   </head>
   <body>
@@ -42,7 +45,7 @@
         const now = new Date();
         const timeString = now.toTimeString().split(" ")[0];
         document.getElementById("clock").textContent = timeString;
-      }
+      }      
       function fetchData() {
         fetch("/api/leaderboard")
           .then((response) => {
@@ -83,21 +86,20 @@
                     </thead>
                     <tbody>`;
           stocks.forEach((stock) => {
-            html += `<tr>
+            const highlightClass = stock.PriceSurge > 0.05 ? 'highlight' : '';
+            html += `<tr class="${highlightClass}">
                         <td>${stock.StockId}</td>
                         <td>${stock.StockName}</td>
                         <td>${stock.TotalAmount}</td>
                         <td>${(stock.PriceIncrease * 100).toFixed(2)}%</td>
-                        <td>${(stock.IntervalPriceIncrease * 100).toFixed(
-                          2
-                        )}%</td>
+                        <td>${(stock.IntervalPriceIncrease * 100).toFixed(2)}%</td>
                         <td>${stock.StatisticalInterval}</td>
                         <td>${stock.PriceSurge}</td>
                     </tr>`;
           });
           html += "</tbody></table>";
         });
-        document.getElementById("data-ttables").innerHTML = html;
+        document.getElementById("data-tables").innerHTML = html;
       }
       updateClock();
       setInterval(updateClock, 1000);
